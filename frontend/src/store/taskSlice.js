@@ -54,6 +54,7 @@ const initialState = {
     items: [],
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
+    searchTerm: '',
 };
 
 const taskSlice = createSlice({
@@ -68,6 +69,9 @@ const taskSlice = createSlice({
                 existingTask.status = status;
             }
         },
+        setSearchTerm: (state, action) => {
+            state.searchTerm = action.payload;
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -102,5 +106,5 @@ const taskSlice = createSlice({
     },
 });
 
-export const { updateTaskStatusOptimistic } = taskSlice.actions;
+export const { updateTaskStatusOptimistic, setSearchTerm } = taskSlice.actions;
 export default taskSlice.reducer;

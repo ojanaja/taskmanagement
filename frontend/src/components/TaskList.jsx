@@ -46,14 +46,22 @@ const COLUMNS = [
 
 export function TaskList() {
     const dispatch = useDispatch();
-    const { items: tasks, status } = useSelector((state) => state.tasks);
+    const { items: tasks, status, searchTerm } = useSelector((state) => state.tasks);
     const [activeId, setActiveId] = useState(null);
 
-    useEffect(() => {
-        if (status === 'idle') {
-            dispatch(fetchTasks());
-        }
-    }, [status, dispatch]);
+    // Filter tasks based on search term
+    const filteredTasks = tasks.filter(task => {
+        if (!searchTerm) return true;
+        const lowerTerm = searchTerm.toLowerCase();
+        return task.title.toLowerCase().includes(lowerTerm) ||
+            task.description.toLowerCase().includes(lowerTerm);
+    });
+
+    const tasksByStatus = {
+        PENDING: filteredTasks.filter((t) => t.status === "PENDING"),
+        IN_PROGRESS: filteredTasks.filter((t) => t.status === "IN_PROGRESS"),
+        COMPLETED: filteredTasks.filter((t) => t.status === "COMPLETED"),
+    }
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -125,12 +133,6 @@ export function TaskList() {
     const handleUpdateTask = (id, updates) => {
         dispatch(updateTask({ id, updates }));
     };
-
-    const tasksByStatus = {
-        PENDING: tasks.filter((t) => t.status === "PENDING"),
-        IN_PROGRESS: tasks.filter((t) => t.status === "IN_PROGRESS"),
-        COMPLETED: tasks.filter((t) => t.status === "COMPLETED"),
-    }
 
     return (
         <div className="space-y-6">

@@ -3,10 +3,12 @@ import { Search, Bell, HelpCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/authSlice";
+import { setSearchTerm } from "../store/taskSlice";
 import { Button } from "@/components/ui/button";
 
 const Header = () => {
     const { user } = useSelector((state) => state.auth);
+    const { searchTerm } = useSelector((state) => state.tasks);
     const dispatch = useDispatch();
 
     const handleLogout = () => {
@@ -21,6 +23,8 @@ const Header = () => {
                     <Input
                         placeholder="Search for anything..."
                         className="pl-10 bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-indigo-100 h-11 w-full rounded-xl"
+                        value={searchTerm}
+                        onChange={(e) => dispatch(setSearchTerm(e.target.value))}
                     />
                 </div>
             </div>
