@@ -36,4 +36,23 @@ public class TaskRequest {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    private java.time.LocalDateTime dueDate;
+    private java.util.List<String> attachments;
+
+    public java.time.LocalDateTime getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(java.time.LocalDateTime dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public java.util.List<String> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(java.util.List<String> attachments) {
+        this.attachments = attachments;
+    }
 }

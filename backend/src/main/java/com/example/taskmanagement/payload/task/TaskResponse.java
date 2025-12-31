@@ -12,14 +12,19 @@ public class TaskResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    private LocalDateTime dueDate;
+    private java.util.List<String> attachments;
+
     public TaskResponse(Long id, String title, String description, TaskStatus status, LocalDateTime createdAt,
-            LocalDateTime updatedAt) {
+            LocalDateTime updatedAt, LocalDateTime dueDate, java.util.List<String> attachments) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.dueDate = dueDate;
+        this.attachments = attachments;
     }
 
     public Long getId() {
@@ -68,5 +73,21 @@ public class TaskResponse {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public LocalDateTime getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDateTime dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public java.util.List<String> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(java.util.List<String> attachments) {
+        this.attachments = attachments;
     }
 }

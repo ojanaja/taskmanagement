@@ -49,6 +49,8 @@ public class TaskServiceImpl implements TaskService {
             }
         }
         task.setUser(user);
+        task.setDueDate(taskRequest.getDueDate());
+        task.setAttachments(taskRequest.getAttachments());
 
         Task savedTask = taskRepository.save(task);
         return mapToResponse(savedTask);
@@ -73,6 +75,8 @@ public class TaskServiceImpl implements TaskService {
                 // Ignore
             }
         }
+        task.setDueDate(taskRequest.getDueDate());
+        task.setAttachments(taskRequest.getAttachments());
 
         Task updatedTask = taskRepository.save(task);
         return mapToResponse(updatedTask);
@@ -110,6 +114,8 @@ public class TaskServiceImpl implements TaskService {
                 task.getDescription(),
                 task.getStatus(),
                 task.getCreatedAt(),
-                task.getUpdatedAt());
+                task.getUpdatedAt(),
+                task.getDueDate(),
+                task.getAttachments());
     }
 }

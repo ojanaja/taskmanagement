@@ -11,6 +11,22 @@ services:
       - task-network
     volumes:
       - task_db_data:/data
+      - task_uploads:/app/uploads
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=taskdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - task-network
 
   frontend:
     build: ./frontend
@@ -26,4 +42,6 @@ networks:
     driver: bridge
 
 volumes:
-  task_db_data:
+  task_db_data: # Keeping old volume just in case user wants to rollback specific files, but not used by postgres
+  task_uploads:
+  postgres_data:

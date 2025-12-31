@@ -5,6 +5,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "tasks")
@@ -35,6 +36,11 @@ public class Task {
     private LocalDateTime updatedAt;
 
     private LocalDateTime dueDate;
+
+    @ElementCollection
+    @CollectionTable(name = "task_attachments", joinColumns = @JoinColumn(name = "task_id"))
+    @Column(name = "file_url")
+    private List<String> attachments;
 
     public Task() {
     }
@@ -100,5 +106,13 @@ public class Task {
 
     public void setDueDate(LocalDateTime dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public List<String> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<String> attachments) {
+        this.attachments = attachments;
     }
 }
