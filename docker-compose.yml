@@ -9,6 +9,8 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     networks:
       - task-network
+    volumes:
+      - task_db_data:/data
 
   frontend:
     build: ./frontend
@@ -22,3 +24,6 @@ services:
 networks:
   task-network:
     driver: bridge
+
+volumes:
+  task_db_data:
