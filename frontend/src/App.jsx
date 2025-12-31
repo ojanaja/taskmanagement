@@ -10,7 +10,6 @@ import { useAuth } from './context/AuthProvider';
 
 import { TaskList } from './components/TaskList';
 
-// Simple Home Component
 const Home = () => {
   const { user, logout } = useAuth();
   return (

@@ -1,6 +1,5 @@
 package com.example.taskmanagement.entity;
 
-import com.example.taskmanagement.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -35,13 +34,16 @@ public class Task {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    private LocalDateTime dueDate;
+
     public Task() {
     }
 
-    public Task(String title, String description, User user) {
+    public Task(String title, String description, User user, LocalDateTime dueDate) {
         this.title = title;
         this.description = description;
         this.user = user;
+        this.dueDate = dueDate;
     }
 
     public Long getId() {
@@ -90,5 +92,13 @@ public class Task {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public LocalDateTime getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDateTime dueDate) {
+        this.dueDate = dueDate;
     }
 }

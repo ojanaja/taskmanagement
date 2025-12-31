@@ -12,9 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-// Unused imports removed
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-// Unused imports removed
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;

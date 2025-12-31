@@ -4,9 +4,6 @@ import { useAuth } from '../context/AuthProvider';
 
 const PublicRoute = () => {
     const { token } = useAuth();
-
-    // If authorized, redirect to home page
-    // If not, return element that will render children (Login/Register)
     return token ? <Navigate to="/" /> : <Outlet />;
 }
 

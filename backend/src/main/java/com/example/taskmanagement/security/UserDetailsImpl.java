@@ -1,6 +1,6 @@
 package com.example.taskmanagement.security;
 
-import com.example.taskmanagement.User;
+import com.example.taskmanagement.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

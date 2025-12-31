@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 
 const Register = () => {
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('ROLE_USER');
     const [error, setError] = useState('');
@@ -16,7 +17,7 @@ const Register = () => {
         e.preventDefault();
         setError('');
         try {
-            await register(username, password, role);
+            await register(username, email, password, role);
             navigate('/login');
         } catch (err) {
             setError(err.response?.data?.message || 'Registration failed');
@@ -35,12 +36,17 @@ const Register = () => {
                         onChange={(e) => setUsername(e.target.value)}
                     />
                     <Input
+                        label="Email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <Input
                         label="Password"
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
-                    {/* Simple role selection for demo purposes */}
                     <div className="mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">Role</label>
                         <select

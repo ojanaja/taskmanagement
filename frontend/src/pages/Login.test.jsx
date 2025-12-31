@@ -4,8 +4,6 @@ import Login from './Login';
 import { AuthProvider } from '../context/AuthProvider';
 import { describe, it, expect, vi } from 'vitest';
 
-// Mock the useAuth hook if needed or mock axios
-// For integration test style, we can mock the context value
 const mockLogin = vi.fn();
 
 vi.mock('../context/AuthProvider', async () => {
@@ -19,8 +17,6 @@ vi.mock('../context/AuthProvider', async () => {
     };
 });
 
-// Mock UI components to avoid issues with specialized shadcn components if complex
-// But for now, we assume they work as standard React components
 vi.mock('@/components/ui/input', () => ({
     Input: (props) => <input data-testid="mock-input" {...props} />
 }));

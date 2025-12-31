@@ -1,7 +1,7 @@
 package com.example.taskmanagement.security;
 
-import com.example.taskmanagement.User;
-import com.example.taskmanagement.UserRepository;
+import com.example.taskmanagement.entity.User;
+import com.example.taskmanagement.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

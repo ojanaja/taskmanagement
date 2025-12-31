@@ -1,7 +1,7 @@
 package com.example.taskmanagement.service;
 
-import com.example.taskmanagement.User;
-import com.example.taskmanagement.UserRepository;
+import com.example.taskmanagement.entity.User;
+import com.example.taskmanagement.repository.UserRepository;
 import com.example.taskmanagement.entity.Task;
 import com.example.taskmanagement.entity.TaskStatus;
 import com.example.taskmanagement.exception.ResourceNotFoundException;

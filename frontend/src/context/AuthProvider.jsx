@@ -30,7 +30,6 @@ export const AuthProvider = ({ children }) => {
                 }).join(''));
                 const decoded = JSON.parse(jsonPayload);
 
-                // Handle roles if they are objects (Spring Security authorities)
                 let roles = decoded.roles;
                 if (Array.isArray(roles) && roles.length > 0 && typeof roles[0] === 'object') {
                     roles = roles.map(r => r.authority || JSON.stringify(r));
@@ -63,10 +62,11 @@ export const AuthProvider = ({ children }) => {
     };
 
 
-    const register = async (username, password, role) => {
+    const register = async (username, email, password, role) => {
         try {
             await api.post('/auth/register', {
                 username,
+                email,
                 password,
                 role
             });

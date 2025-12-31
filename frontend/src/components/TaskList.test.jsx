@@ -3,7 +3,6 @@ import { TaskList } from '../components/TaskList';
 import api from '../lib/api';
 import { vi } from 'vitest';
 
-// Mock the API module
 vi.mock('../lib/api');
 
 describe('TaskList Component', () => {
@@ -52,8 +51,6 @@ describe('TaskList Component', () => {
             expect(screen.queryByText('Loading tasks...')).not.toBeInTheDocument();
         });
 
-        // In a real app we might show an error message, but currently we just stop loading
-        // Check that console.error was called
         expect(consoleSpy).toHaveBeenCalledWith("Failed to fetch tasks", expect.any(Error));
 
         consoleSpy.mockRestore();

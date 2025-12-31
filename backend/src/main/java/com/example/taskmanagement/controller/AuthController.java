@@ -3,8 +3,8 @@ package com.example.taskmanagement.controller;
 import com.example.taskmanagement.payload.*;
 import com.example.taskmanagement.security.JwtUtils;
 import com.example.taskmanagement.security.UserDetailsImpl;
-import com.example.taskmanagement.User;
-import com.example.taskmanagement.UserRepository;
+import com.example.taskmanagement.entity.User;
+import com.example.taskmanagement.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -62,8 +62,15 @@ public class AuthController {
                                         .body(new MessageResponse("Error: Username is already taken!"));
                 }
 
+                if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+                        return ResponseEntity
+                                        .badRequest()
+                                        .body(new MessageResponse("Error: Email is already in use!"));
+                }
+
                 // Create new user's account
                 User user = new User(signUpRequest.getUsername(),
+                                signUpRequest.getEmail(),
                                 encoder.encode(signUpRequest.getPassword()),
                                 signUpRequest.getRole() != null ? signUpRequest.getRole() : "ROLE_USER");
 
