@@ -1,24 +1,26 @@
-import { useState } from 'react';
-import { useAuth } from '../context/AuthProvider';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
+import { loginUser, clearError } from '../store/authSlice';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const { login } = useAuth();
+    const { status, error } = useSelector((state) => state.auth);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        dispatch(clearError());
+    }, [dispatch]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        try {
-            await login(username, password);
+        const resultAction = await dispatch(loginUser({ username, password }));
+        if (loginUser.fulfilled.match(resultAction)) {
             navigate('/');
-        } catch (err) {
-            setError('Invalid username or password');
         }
     };
 

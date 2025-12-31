@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchTasks, updateTask, deleteTask, updateTaskStatusOptimistic } from "../store/taskSlice";
 import {
     DndContext,
     closestCorners,
@@ -10,7 +12,6 @@ import {
     useDroppable,
 } from "@dnd-kit/core";
 import {
-    arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
@@ -27,7 +28,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Paperclip, FileIcon } from "lucide-react";
+import { Calendar, Paperclip, FileIcon, MessageSquare } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -38,33 +39,28 @@ import api from "@/lib/api";
 import { CreateTask } from "./CreateTask";
 
 const COLUMNS = [
-    { id: "PENDING", title: "Pending", color: "bg-yellow-100" },
-    { id: "IN_PROGRESS", title: "In Progress", color: "bg-blue-100" },
-    { id: "COMPLETED", title: "Completed", color: "bg-green-100" },
+    { id: 'PENDING', title: 'To Do', color: 'bg-blue-50 text-blue-700' },
+    { id: 'IN_PROGRESS', title: 'In Progress', color: 'bg-purple-50 text-purple-700' },
+    { id: 'COMPLETED', title: 'Done', color: 'bg-green-50 text-green-700' }
 ];
 
 export function TaskList() {
-    const [tasks, setTasks] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const dispatch = useDispatch();
+    const { items: tasks, status } = useSelector((state) => state.tasks);
     const [activeId, setActiveId] = useState(null);
 
-    const fetchTasks = async () => {
-        try {
-            const response = await api.get("/tasks");
-            setTasks(response.data);
-        } catch (error) {
-            console.error("Failed to fetch tasks", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
-        fetchTasks();
-    }, []);
+        if (status === 'idle') {
+            dispatch(fetchTasks());
+        }
+    }, [status, dispatch]);
 
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
@@ -102,47 +98,23 @@ export function TaskList() {
 
         if (activeTask.status !== newStatus) {
             // Optimistic Update
-            const updatedTasks = tasks.map(t =>
-                t.id === activeTask.id ? { ...t, status: newStatus } : t
-            );
-            setTasks(updatedTasks);
+            dispatch(updateTaskStatusOptimistic({ id: activeTask.id, status: newStatus }));
 
-            // API Call
-            try {
-                await api.put(`/tasks/${activeTask.id}`, { ...activeTask, status: newStatus });
-            } catch (error) {
-                console.error("Failed to update task status", error);
-                fetchTasks(); // Revert on failure
-            }
+            // API Call (Dispatched Action)
+            dispatch(updateTask({ id: activeTask.id, updates: { status: newStatus } }));
         }
 
         setActiveId(null);
     };
 
-    const handleDelete = async (id) => {
+    const handleDelete = (id) => {
         if (confirm("Are you sure you want to delete this task?")) {
-            try {
-                await api.delete(`/tasks/${id}`)
-                fetchTasks() // Refresh to remove from list
-            } catch (error) {
-                console.error("Failed to delete task", error)
-            }
+            dispatch(deleteTask(id));
         }
     }
 
-    const handleUpdateTask = async (id, updates) => {
-        try {
-            const task = tasks.find(t => t.id === id);
-            const updatedTask = { ...task, ...updates };
-
-            // Optimistic update
-            setTasks(tasks.map(t => t.id === id ? updatedTask : t));
-
-            await api.put(`/tasks/${id}`, updatedTask);
-        } catch (error) {
-            console.error("Failed to update task", error);
-            fetchTasks(); // Revert
-        }
+    const handleUpdateTask = (id, updates) => {
+        dispatch(updateTask({ id, updates }));
     };
 
     const tasksByStatus = {
@@ -155,7 +127,7 @@ export function TaskList() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-3xl font-bold tracking-tight">Kanban Board</h2>
-                <CreateTask onTaskCreated={fetchTasks} />
+                <CreateTask />
             </div>
 
             <DndContext
@@ -262,16 +234,20 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
         setPreviewUrl(url);
     };
 
+    // Mock Priority for visualization
+    const priority = task.title.length % 3 === 0 ? "High" : task.title.length % 2 === 0 ? "Medium" : "Low";
+    const priorityColor = priority === "High" ? "bg-red-100 text-red-600" : priority === "Medium" ? "bg-orange-100 text-orange-600" : "bg-blue-100 text-blue-600";
+    const priorityLabel = priority === "High" ? "Important" : priority === "Medium" ? "Review" : "Low Priority";
+
     if (isOverlay) {
         return (
-            <Card className="shadow-xl cursor-grabbing w-full">
-                <CardHeader className="p-4 pb-2">
-                    <CardTitle className="text-sm font-medium">{task.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 pt-0 text-xs text-muted-foreground">
-                    {task.description}
-                </CardContent>
-            </Card>
+            <div className="bg-white p-5 rounded-2xl shadow-xl cursor-grabbing w-full border border-gray-100">
+                <div className="flex justify-between items-start mb-2">
+                    <span className={`text-[10px] font-bold px-2 py-1 rounded-md ${priorityColor}`}>{priorityLabel}</span>
+                </div>
+                <h4 className="font-bold text-gray-800 mb-2 text-sm">{task.title}</h4>
+                <p className="text-gray-500 text-xs mb-4">{task.description}</p>
+            </div>
         )
     }
 
@@ -311,9 +287,9 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
                         <span className="text-xs text-muted-foreground font-medium">Attachments</span>
                         <div className="flex flex-wrap gap-2 mb-2">
                             {task.attachments?.map((url, idx) => (
-                                <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline flex items-center bg-blue-50 px-2 py-1 rounded">
+                                <button key={idx} onClick={(e) => handleFileClick(e, url)} className="text-xs text-blue-500 hover:underline flex items-center bg-blue-50 px-2 py-1 rounded">
                                     <FileIcon className="w-3 h-3 mr-1" /> File {idx + 1}
-                                </a>
+                                </button>
                             ))}
                         </div>
                         <Input
@@ -334,76 +310,62 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
 
     return (
         <>
-            <Card
+            <div
                 ref={setNodeRef}
                 style={style}
                 {...attributes}
                 {...listeners}
-                className={`group cursor-grab touch-none hover:shadow-md transition-shadow bg-white ${isDragging ? 'z-50' : ''}`}
+                className={`bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-grab group ${isDragging ? 'z-50 opacity-50' : ''}`}
+                onDoubleClick={() => setIsEditing(true)}
             >
-                <CardHeader className="p-4 pb-2">
-                    <CardTitle className="text-base font-medium flex justify-between items-start gap-2">
-                        <span>{task.title}</span>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={(e) => {
-                                // Prevent drag
-                            }}
-                            onPointerDown={(e) => {
-                                e.stopPropagation();
-                                setIsEditing(true);
-                            }}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pencil"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
-                        </Button>
-                    </CardTitle>
-                    <div className="text-xs text-gray-400 flex flex-col gap-1">
-                        <span>{new Date(task.createdAt).toLocaleDateString()}</span>
-                        {task.dueDate && (
-                            <span className={`flex items-center gap-1 ${new Date(task.dueDate) < new Date() ? 'text-red-500 font-bold' : 'text-orange-500'}`}>
-                                <Calendar className="w-3 h-3" />
-                                {new Date(task.dueDate).toLocaleDateString()}
-                            </span>
+                <div className="flex justify-between items-start mb-3">
+                    <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide ${priorityColor}`}>
+                        {priorityLabel}
+                    </span>
+                    <button
+                        onClick={() => setIsEditing(true)}
+                        className="text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg>
+                    </button>
+                </div>
+
+                <h4 className="font-bold text-gray-800 mb-2 text-sm leading-snug">{task.title}</h4>
+                <p className="text-gray-500 text-xs mb-4 line-clamp-2">{task.description}</p>
+
+                {task.attachments && task.attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        {task.attachments.slice(0, 3).map((url, idx) => (
+                            <div key={idx} className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500 cursor-pointer hover:bg-blue-100" onClick={(e) => handleFileClick(e, url)} onPointerDown={(e) => e.stopPropagation()}>
+                                <FileIcon className="w-4 h-4" />
+                            </div>
+                        ))}
+                        {task.attachments.length > 3 && (
+                            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-500 text-xs font-medium">
+                                +{task.attachments.length - 3}
+                            </div>
                         )}
                     </div>
-                </CardHeader>
-                <CardContent className="p-4 pt-0 space-y-2">
-                    <p className="text-sm text-gray-600 line-clamp-3">{task.description}</p>
+                )}
 
-                    {task.attachments && task.attachments.length > 0 && (
-                        <div className="flex flex-wrap gap-2 pt-2 border-t mt-2">
-                            {task.attachments.map((url, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={(e) => handleFileClick(e, url)}
-                                    // Make it behave like a link but prevent default
-                                    onPointerDown={(e) => e.stopPropagation()}
-                                    className="inline-flex items-center px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-xs text-gray-700"
-                                >
-                                    <Paperclip className="w-3 h-3 mr-1" />
-                                    File {idx + 1}
-                                </button>
-                            ))}
+                <div className="flex items-center justify-between pt-2 border-t border-gray-50">
+                    <div className="flex -space-x-2">
+                        <img className="w-6 h-6 rounded-full border-2 border-white" src={`https://ui-avatars.com/api/?name=User+One&background=random`} alt="User" />
+                        <img className="w-6 h-6 rounded-full border-2 border-white" src={`https://ui-avatars.com/api/?name=User+Two&background=random`} alt="User" />
+                    </div>
+
+                    <div className="flex items-center gap-3 text-gray-400">
+                        <div className="flex items-center gap-1 text-xs">
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            <span>{task.id % 20 + 2}</span>
                         </div>
-                    )}
-                </CardContent>
-                <CardFooter className="p-4 pt-2 flex justify-end border-t bg-gray-50/50">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 px-2"
-                        onPointerDown={(e) => e.stopPropagation()}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete(task.id);
-                        }}
-                    >
-                        Delete
-                    </Button>
-                </CardFooter>
-            </Card>
+                        <div className="flex items-center gap-1 text-xs">
+                            <Paperclip className="w-3.5 h-3.5" />
+                            <span>{task.attachments ? task.attachments.length : 0}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <Dialog open={!!previewUrl} onOpenChange={(open) => !open && setPreviewUrl(null)}>
                 <DialogContent className="sm:max-w-[800px] h-[80vh] flex flex-col">

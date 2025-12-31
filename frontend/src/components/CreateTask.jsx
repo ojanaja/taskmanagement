@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { createTask } from '../store/taskSlice';
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -15,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FileIcon } from "lucide-react";
 import api from '@/lib/api';
 
-export function CreateTask({ onTaskCreated }) {
+export function CreateTask() {
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -24,23 +26,25 @@ export function CreateTask({ onTaskCreated }) {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
 
+    const dispatch = useDispatch();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            await api.post('/tasks', {
+            await dispatch(createTask({
                 title,
                 description,
                 status: 'PENDING',
                 dueDate: dueDate ? new Date(dueDate).toISOString() : null,
                 attachments: attachments
-            });
+            })).unwrap();
+
             setOpen(false);
             setTitle('');
             setDescription('');
             setDueDate('');
             setAttachments([]);
-            if (onTaskCreated) onTaskCreated();
         } catch (error) {
             console.error("Failed to create task", error);
         } finally {

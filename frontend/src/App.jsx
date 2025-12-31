@@ -1,47 +1,41 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthProvider';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from './store/authSlice';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import PrivateRoute from './components/PrivateRoute';
 import PublicRoute from './components/PublicRoute';
 import { Button } from '@/components/ui/button';
-import { useAuth } from './context/AuthProvider';
-
 import { TaskList } from './components/TaskList';
 
-const Home = () => {
-  const { user, logout } = useAuth();
-  return (
-    <div className="container mx-auto p-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Welcome, {user?.username}!</h1>
-          <p className="text-muted-foreground">Manage your tasks efficiently.</p>
-        </div>
-        <Button onClick={logout} variant="secondary">Logout</Button>
-      </div>
+import Layout from './components/Layout';
 
+const Home = () => {
+  return (
+    <Layout>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Kanban Board</h1>
+        <p className="text-gray-500 mt-1">Monitor project status and team productivity</p>
+      </div>
       <TaskList />
-    </div>
+    </Layout>
   );
 };
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route element={<PublicRoute />}>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-          </Route>
-          <Route element={<PrivateRoute />}>
-            <Route path="/" element={<Home />} />
-          </Route>
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <Router>
+      <Routes>
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Route>
+        <Route element={<PrivateRoute />}>
+          <Route path="/" element={<Home />} />
+        </Route>
+      </Routes>
+    </Router>
   );
 }
 

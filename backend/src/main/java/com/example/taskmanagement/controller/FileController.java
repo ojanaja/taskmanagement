@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/files")
 public class FileController {

@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { useAuth } from '../context/AuthProvider';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
+import { registerUser, clearError } from '../store/authSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -9,18 +10,19 @@ const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('ROLE_USER');
-    const [error, setError] = useState('');
-    const { register } = useAuth();
+    const { status, error } = useSelector((state) => state.auth);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        dispatch(clearError());
+    }, [dispatch]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        try {
-            await register(username, email, password, role);
+        const resultAction = await dispatch(registerUser({ username, email, password, role }));
+        if (registerUser.fulfilled.match(resultAction)) {
             navigate('/login');
-        } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed');
         }
     };
 
