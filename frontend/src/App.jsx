@@ -5,11 +5,14 @@ import { logout } from './store/authSlice';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import PrivateRoute from './components/PrivateRoute';
+import ProtectedRoute from './components/PrivateRoute'; // Assuming PrivateRoute is renamed to ProtectedRoute
 import PublicRoute from './components/PublicRoute';
 import { Button } from '@/components/ui/button';
 import { TaskList } from './components/TaskList';
 
 import Layout from './components/Layout';
+
+import Members from "./pages/Members";
 
 const Home = () => {
   return (
@@ -23,20 +26,31 @@ const Home = () => {
   );
 };
 
-function App() {
+const App = () => {
   return (
     <Router>
       <Routes>
-        <Route element={<PublicRoute />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-        </Route>
-        <Route element={<PrivateRoute />}>
-          <Route path="/" element={<Home />} />
-        </Route>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/members"
+          element={
+            <ProtectedRoute>
+              <Members />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );
-}
+};
 
 export default App;
