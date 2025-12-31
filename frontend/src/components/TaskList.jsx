@@ -101,7 +101,16 @@ export function TaskList() {
             dispatch(updateTaskStatusOptimistic({ id: activeTask.id, status: newStatus }));
 
             // API Call (Dispatched Action)
-            dispatch(updateTask({ id: activeTask.id, updates: { status: newStatus } }));
+            // Ensure we send the full object because the backend PUT /tasks/{id} validation requires 'title' and 'description'
+            dispatch(updateTask({
+                id: activeTask.id,
+                updates: {
+                    ...activeTask,
+                    status: newStatus,
+                    // Ensure dates are strings if needed, though Redux usually has them as strings from API
+                    dueDate: activeTask.dueDate
+                }
+            }));
         }
 
         setActiveId(null);

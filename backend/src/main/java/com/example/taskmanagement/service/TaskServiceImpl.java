@@ -27,7 +27,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<TaskResponse> getAllTasks(Long userId) {
-        List<Task> tasks = taskRepository.findByUserId(userId);
+        // Shared Board: Return ALL tasks regardless of user
+        List<Task> tasks = taskRepository.findAll();
         return tasks.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
@@ -45,7 +46,7 @@ public class TaskServiceImpl implements TaskService {
             try {
                 task.setStatus(TaskStatus.valueOf(taskRequest.getStatus()));
             } catch (IllegalArgumentException e) {
-                // Ignore invalid status and keep default, or throw exception
+                // Ignore invalid status and keep default
             }
         }
         task.setUser(user);
@@ -62,9 +63,8 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
-        if (!task.getUser().getId().equals(userId)) {
-            throw new ResourceNotFoundException("Task not found"); // Hide existence if not owner
-        }
+        // Shared Board: Allow any authenticated user to update any task
+        // if (!task.getUser().getId().equals(userId)) { ... }
 
         task.setTitle(taskRequest.getTitle());
         task.setDescription(taskRequest.getDescription());
@@ -88,9 +88,8 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
-        if (!task.getUser().getId().equals(userId)) {
-            throw new ResourceNotFoundException("Task not found");
-        }
+        // Shared Board: Allow any authenticated user to delete any task
+        // if (!task.getUser().getId().equals(userId)) { ... }
 
         taskRepository.delete(task);
     }
@@ -100,9 +99,8 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
-        if (!task.getUser().getId().equals(userId)) {
-            throw new ResourceNotFoundException("Task not found");
-        }
+        // Shared Board: Allow any authenticated user to view any task
+        // if (!task.getUser().getId().equals(userId)) { ... }
 
         return mapToResponse(task);
     }
