@@ -28,7 +28,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Paperclip, FileIcon, MessageSquare } from "lucide-react";
+import { Calendar, Paperclip, FileIcon, MessageSquare, Pencil } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -350,12 +350,6 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
                     <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide ${priorityColor}`}>
                         {priorityLabel}
                     </span>
-                    <button
-                        onClick={() => setIsEditing(true)}
-                        className="text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg>
-                    </button>
                 </div>
 
                 <h4 className="font-bold text-gray-800 mb-2 text-sm leading-snug">{task.title}</h4>
@@ -386,6 +380,13 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
                             <span>{task.attachments ? task.attachments.length : 0}</span>
                         </div>
                     </div>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
+                        className="text-gray-400 hover:text-blue-600 transition-colors p-1 hover:bg-blue-50 rounded-md"
+                        title="Edit Task"
+                    >
+                        <Pencil className="w-3.5 h-3.5" />
+                    </button>
                 </div>
 
                 {task.assignedUserId && (
