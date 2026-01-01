@@ -57,7 +57,6 @@ const Members = () => {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Shield className="w-4 h-4 text-gray-400" />
-                                    {/* Display roles if available, else standard user */}
                                     <span>
                                         {user.roles && user.roles.length > 0
                                             ? user.roles.map(r => r.name).join(", ")

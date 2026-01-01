@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../lib/api';
 
-// Async Thunks
 export const fetchTasks = createAsyncThunk(
     'tasks/fetchTasks',
     async (_, { rejectWithValue }) => {
@@ -52,7 +51,7 @@ export const deleteTask = createAsyncThunk(
 
 const initialState = {
     items: [],
-    status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+    status: 'idle',
     error: null,
     searchTerm: '',
 };
@@ -61,7 +60,6 @@ const taskSlice = createSlice({
     name: 'tasks',
     initialState,
     reducers: {
-        // Optimistic update for Drag and Drop
         updateTaskStatusOptimistic: (state, action) => {
             const { id, status } = action.payload;
             const existingTask = state.items.find(task => task.id === id);
@@ -75,7 +73,6 @@ const taskSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Fetch
             .addCase(fetchTasks.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
@@ -88,18 +85,15 @@ const taskSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload;
             })
-            // Create
             .addCase(createTask.fulfilled, (state, action) => {
                 state.items.push(action.payload);
             })
-            // Update
             .addCase(updateTask.fulfilled, (state, action) => {
                 const index = state.items.findIndex(task => task.id === action.payload.id);
                 if (index !== -1) {
                     state.items[index] = action.payload;
                 }
             })
-            // Delete
             .addCase(deleteTask.fulfilled, (state, action) => {
                 state.items = state.items.filter(task => task.id !== action.payload);
             });

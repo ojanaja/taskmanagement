@@ -24,7 +24,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
       - task-network
 
@@ -42,6 +42,6 @@ networks:
     driver: bridge
 
 volumes:
-  task_db_data: # Keeping old volume just in case user wants to rollback specific files, but not used by postgres
+  task_db_data:
   task_uploads:
   postgres_data:

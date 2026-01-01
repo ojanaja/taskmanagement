@@ -50,14 +50,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(org.springframework.security.config.Customizer.withDefaults()) // Enable CORS
+        http.cors(org.springframework.security.config.Customizer.withDefaults()) 
                 .csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/health").permitAll()
-                        .requestMatchers("/").permitAll() // Allow root for basic check
-                        .requestMatchers("/uploads/**").permitAll() // Allow serving uploaded files
+                        .requestMatchers("/").permitAll() 
+                        .requestMatchers("/uploads/**").permitAll() 
                         .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());

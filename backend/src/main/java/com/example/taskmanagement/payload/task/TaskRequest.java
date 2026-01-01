@@ -55,4 +55,14 @@ public class TaskRequest {
     public void setAttachments(java.util.List<String> attachments) {
         this.attachments = attachments;
     }
+
+    private String priority;
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
+    }
 }

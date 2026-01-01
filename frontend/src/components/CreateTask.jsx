@@ -22,6 +22,7 @@ export function CreateTask() {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [dueDate, setDueDate] = useState('');
+    const [priority, setPriority] = useState('MEDIUM');
     const [attachments, setAttachments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -36,6 +37,7 @@ export function CreateTask() {
                 title,
                 description,
                 status: 'PENDING',
+                priority,
                 dueDate: dueDate ? new Date(dueDate).toISOString() : null,
                 attachments: attachments
             })).unwrap();
@@ -44,6 +46,7 @@ export function CreateTask() {
             setTitle('');
             setDescription('');
             setDueDate('');
+            setPriority('MEDIUM');
             setAttachments([]);
         } catch (error) {
             console.error("Failed to create task", error);
@@ -73,18 +76,17 @@ export function CreateTask() {
             alert("File upload failed");
         } finally {
             setUploading(false);
-            // Clear input value so same file can be selected again if needed
             e.target.value = '';
         }
     };
 
-    // reset form when closed
     const handleOpenChange = (newOpen) => {
         setOpen(newOpen);
         if (!newOpen) {
             setTitle('');
             setDescription('');
             setDueDate('');
+            setPriority('MEDIUM');
             setAttachments([]);
         }
     }
@@ -138,6 +140,21 @@ export function CreateTask() {
                                 onChange={(e) => setDueDate(e.target.value)}
                                 className="col-span-3"
                             />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="priority" className="text-right">
+                                Priority
+                            </Label>
+                            <select
+                                id="priority"
+                                value={priority}
+                                onChange={(e) => setPriority(e.target.value)}
+                                className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <option value="LOW">Low</option>
+                                <option value="MEDIUM">Medium</option>
+                                <option value="HIGH">High</option>
+                            </select>
                         </div>
                         <div className="grid grid-cols-4 items-start gap-4">
                             <Label htmlFor="attachments" className="text-right pt-2">

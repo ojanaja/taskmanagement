@@ -49,7 +49,6 @@ export function TaskList() {
     const { items: tasks, status, searchTerm } = useSelector((state) => state.tasks);
     const [activeId, setActiveId] = useState(null);
 
-    // Filter tasks based on search term
     const filteredTasks = tasks.filter(task => {
         if (!searchTerm) return true;
         const lowerTerm = searchTerm.toLowerCase();
@@ -87,35 +86,26 @@ export function TaskList() {
         }
 
         const activeTask = tasks.find((t) => t.id === active.id);
-        const overId = over.id; // This could be a task ID or a container ID
+        const overId = over.id;
 
-        // If dropped on a container (column)
         let newStatus = overId;
-
-        // If dropped on another task, find that task's status
         if (!COLUMNS.find(c => c.id === overId)) {
             const overTask = tasks.find(t => t.id === overId);
             if (overTask) {
                 newStatus = overTask.status;
             } else {
-                // Should not happen if overId is valid
                 setActiveId(null);
                 return;
             }
         }
 
         if (activeTask.status !== newStatus) {
-            // Optimistic Update
             dispatch(updateTaskStatusOptimistic({ id: activeTask.id, status: newStatus }));
-
-            // API Call (Dispatched Action)
-            // Ensure we send the full object because the backend PUT /tasks/{id} validation requires 'title' and 'description'
             dispatch(updateTask({
                 id: activeTask.id,
                 updates: {
                     ...activeTask,
                     status: newStatus,
-                    // Ensure dates are strings if needed, though Redux usually has them as strings from API
                     dueDate: activeTask.dueDate
                 }
             }));
@@ -183,7 +173,8 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(task.title);
     const [editDescription, setEditDescription] = useState(task.description);
-    const [editDueDate, setEditDueDate] = useState(task.dueDate ? task.dueDate.slice(0, 16) : ""); // Format for datetime-local
+    const [editDueDate, setEditDueDate] = useState(task.dueDate ? task.dueDate.slice(0, 16) : "");
+    const [editPriority, setEditPriority] = useState(task.priority || "MEDIUM");
     const [uploading, setUploading] = useState(false);
     const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -198,6 +189,7 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
             title: editTitle,
             description: editDescription,
             dueDate: editDueDate ? new Date(editDueDate).toISOString() : null,
+            priority: editPriority
         });
         setIsEditing(false);
     };
@@ -206,6 +198,7 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
         setEditTitle(task.title);
         setEditDescription(task.description);
         setEditDueDate(task.dueDate ? task.dueDate.slice(0, 16) : "");
+        setEditPriority(task.priority || "MEDIUM");
         setIsEditing(false);
     };
 
@@ -224,10 +217,9 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
                 },
             });
 
-            const newAttachment = response.data.fileUrl; // or response.data.fileName
+            const newAttachment = response.data.fileUrl;
             const currentAttachments = task.attachments || [];
 
-            // Immediately update
             handleUpdateTask(task.id, {
                 attachments: [...currentAttachments, newAttachment]
             });
@@ -245,10 +237,9 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
         setPreviewUrl(url);
     };
 
-    // Mock Priority for visualization
-    const priority = task.title.length % 3 === 0 ? "High" : task.title.length % 2 === 0 ? "Medium" : "Low";
-    const priorityColor = priority === "High" ? "bg-red-100 text-red-600" : priority === "Medium" ? "bg-orange-100 text-orange-600" : "bg-blue-100 text-blue-600";
-    const priorityLabel = priority === "High" ? "Important" : priority === "Medium" ? "Review" : "Low Priority";
+    const priority = task.priority || "MEDIUM";
+    const priorityColor = priority === "HIGH" ? "bg-red-100 text-red-600" : priority === "MEDIUM" ? "bg-orange-100 text-orange-600" : "bg-blue-100 text-blue-600";
+    const priorityLabel = priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase();
 
     if (isOverlay) {
         return (
@@ -285,13 +276,27 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
                         placeholder="Description"
                     />
 
-                    <div className="space-y-1">
-                        <span className="text-xs text-muted-foreground font-medium">Deadline</span>
-                        <Input
-                            type="datetime-local"
-                            value={editDueDate}
-                            onChange={(e) => setEditDueDate(e.target.value)}
-                        />
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                            <span className="text-xs text-muted-foreground font-medium">Priority</span>
+                            <select
+                                value={editPriority}
+                                onChange={(e) => setEditPriority(e.target.value)}
+                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <option value="LOW">Low</option>
+                                <option value="MEDIUM">Medium</option>
+                                <option value="HIGH">High</option>
+                            </select>
+                        </div>
+                        <div className="space-y-1">
+                            <span className="text-xs text-muted-foreground font-medium">Deadline</span>
+                            <Input
+                                type="datetime-local"
+                                value={editDueDate}
+                                onChange={(e) => setEditDueDate(e.target.value)}
+                            />
+                        </div>
                     </div>
 
                     <div className="space-y-1">
@@ -360,15 +365,9 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
                 )}
 
                 <div className="flex items-center justify-between pt-2 border-t border-gray-50">
-                    <div className="flex -space-x-2">
-                        <img className="w-6 h-6 rounded-full border-2 border-white" src={`https://ui-avatars.com/api/?name=User+One&background=random`} alt="User" />
-                        <img className="w-6 h-6 rounded-full border-2 border-white" src={`https://ui-avatars.com/api/?name=User+Two&background=random`} alt="User" />
-                    </div>
-
                     <div className="flex items-center gap-3 text-gray-400">
                         <div className="flex items-center gap-1 text-xs">
-                            <MessageSquare className="w-3.5 h-3.5" />
-                            <span>{task.id % 20 + 2}</span>
+                            <span className="text-[10px]">#{task.id}</span>
                         </div>
                         <div className="flex items-center gap-1 text-xs">
                             <Paperclip className="w-3.5 h-3.5" />

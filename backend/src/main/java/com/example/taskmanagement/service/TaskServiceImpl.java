@@ -4,6 +4,7 @@ import com.example.taskmanagement.entity.User;
 import com.example.taskmanagement.repository.UserRepository;
 import com.example.taskmanagement.entity.Task;
 import com.example.taskmanagement.entity.TaskStatus;
+import com.example.taskmanagement.entity.TaskPriority;
 import com.example.taskmanagement.exception.ResourceNotFoundException;
 import com.example.taskmanagement.payload.task.TaskRequest;
 import com.example.taskmanagement.payload.task.TaskResponse;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// Unused imports removed
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +27,6 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<TaskResponse> getAllTasks(Long userId) {
-        // Shared Board: Return ALL tasks regardless of user
         List<Task> tasks = taskRepository.findAll();
         return tasks.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
@@ -46,9 +45,17 @@ public class TaskServiceImpl implements TaskService {
             try {
                 task.setStatus(TaskStatus.valueOf(taskRequest.getStatus()));
             } catch (IllegalArgumentException e) {
-                // Ignore invalid status and keep default
             }
         }
+
+        if (taskRequest.getPriority() != null) {
+            try {
+                task.setPriority(TaskPriority.valueOf(taskRequest.getPriority()));
+            } catch (IllegalArgumentException e) {
+                // Ignore
+            }
+        }
+
         task.setUser(user);
         task.setDueDate(taskRequest.getDueDate());
         task.setAttachments(taskRequest.getAttachments());
@@ -63,16 +70,19 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
-        // Shared Board: Allow any authenticated user to update any task
-        // if (!task.getUser().getId().equals(userId)) { ... }
-
         task.setTitle(taskRequest.getTitle());
         task.setDescription(taskRequest.getDescription());
         if (taskRequest.getStatus() != null) {
             try {
                 task.setStatus(TaskStatus.valueOf(taskRequest.getStatus()));
             } catch (IllegalArgumentException e) {
-                // Ignore
+            }
+        }
+        if (taskRequest.getPriority() != null) {
+            try {
+                task.setPriority(TaskPriority.valueOf(taskRequest.getPriority()));
+            } catch (IllegalArgumentException e) {
+
             }
         }
         task.setDueDate(taskRequest.getDueDate());
@@ -88,9 +98,6 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
-        // Shared Board: Allow any authenticated user to delete any task
-        // if (!task.getUser().getId().equals(userId)) { ... }
-
         taskRepository.delete(task);
     }
 
@@ -98,9 +105,6 @@ public class TaskServiceImpl implements TaskService {
     public TaskResponse getTaskById(Long userId, Long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
-
-        // Shared Board: Allow any authenticated user to view any task
-        // if (!task.getUser().getId().equals(userId)) { ... }
 
         return mapToResponse(task);
     }
@@ -114,6 +118,7 @@ public class TaskServiceImpl implements TaskService {
                 task.getCreatedAt(),
                 task.getUpdatedAt(),
                 task.getDueDate(),
-                task.getAttachments());
+                task.getAttachments(),
+                task.getPriority());
     }
 }

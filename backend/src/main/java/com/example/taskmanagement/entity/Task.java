@@ -42,14 +42,19 @@ public class Task {
     @Column(name = "file_url")
     private List<String> attachments;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TaskPriority priority = TaskPriority.MEDIUM;
+
     public Task() {
     }
 
-    public Task(String title, String description, User user, LocalDateTime dueDate) {
+    public Task(String title, String description, User user, LocalDateTime dueDate, TaskPriority priority) {
         this.title = title;
         this.description = description;
         this.user = user;
         this.dueDate = dueDate;
+        this.priority = priority;
     }
 
     public Long getId() {
@@ -114,5 +119,13 @@ public class Task {
 
     public void setAttachments(List<String> attachments) {
         this.attachments = attachments;
+    }
+
+    public TaskPriority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(TaskPriority priority) {
+        this.priority = priority;
     }
 }

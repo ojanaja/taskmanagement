@@ -1,6 +1,7 @@
 package com.example.taskmanagement.payload.task;
 
 import com.example.taskmanagement.entity.TaskStatus;
+import com.example.taskmanagement.entity.TaskPriority;
 
 import java.time.LocalDateTime;
 
@@ -12,11 +13,12 @@ public class TaskResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private LocalDateTime dueDate;
+    private java.time.LocalDateTime dueDate;
     private java.util.List<String> attachments;
+    private TaskPriority priority;
 
     public TaskResponse(Long id, String title, String description, TaskStatus status, LocalDateTime createdAt,
-            LocalDateTime updatedAt, LocalDateTime dueDate, java.util.List<String> attachments) {
+            LocalDateTime updatedAt, LocalDateTime dueDate, java.util.List<String> attachments, TaskPriority priority) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -25,10 +27,21 @@ public class TaskResponse {
         this.updatedAt = updatedAt;
         this.dueDate = dueDate;
         this.attachments = attachments;
+        this.priority = priority;
     }
 
     public Long getId() {
         return id;
+    }
+
+    // ... items ...
+
+    public TaskPriority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(TaskPriority priority) {
+        this.priority = priority;
     }
 
     public void setId(Long id) {

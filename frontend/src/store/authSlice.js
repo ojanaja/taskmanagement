@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../lib/api';
 
-// Async Thunks
 export const loginUser = createAsyncThunk(
     'auth/loginUser',
     async (credentials, { rejectWithValue }) => {
@@ -29,7 +28,7 @@ export const registerUser = createAsyncThunk(
 const initialState = {
     user: JSON.parse(localStorage.getItem('user')) || null,
     token: localStorage.getItem('token') || null,
-    status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+    status: 'idle',
     error: null,
 };
 
@@ -51,7 +50,6 @@ const authSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Login
             .addCase(loginUser.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
@@ -72,18 +70,12 @@ const authSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload;
             })
-            // Register
             .addCase(registerUser.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
             })
             .addCase(registerUser.fulfilled, (state) => {
                 state.status = 'succeeded';
-                // Note: Register usually doesn't return token immediately in some APIs, 
-                // but if it does, handle it. Assuming user needs to login after register 
-                // or if register logs them in auto. 
-                // Existing api.post('/auth/signup') returns MessageResponse ("User registered successfully!")
-                // So we don't set user/token here unless the API changes.
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.status = 'failed';

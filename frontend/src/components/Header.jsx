@@ -1,5 +1,5 @@
 
-import { Search, Bell, HelpCircle } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/authSlice";
@@ -30,22 +30,12 @@ const Header = () => {
             </div>
 
             <div className="flex items-center gap-6">
-                <div className="flex items-center gap-4 text-gray-400">
-                    <button className="p-2 hover:bg-gray-50 rounded-full transition-colors relative">
-                        <Bell className="w-6 h-6" />
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                    </button>
-                    <button className="p-2 hover:bg-gray-50 rounded-full transition-colors">
-                        <HelpCircle className="w-6 h-6" />
-                    </button>
-                </div>
-
                 <div className="h-8 w-px bg-gray-200 mx-2"></div>
 
                 <div className="flex items-center gap-3">
                     <div className="text-right hidden md:block">
                         <p className="text-sm font-bold text-gray-800">{user?.username || "Admin"}</p>
-                        <p className="text-xs text-gray-500">Project Manager</p>
+                        <p className="text-xs text-gray-500">Member</p>
                     </div>
                     <img
                         src={`https://ui-avatars.com/api/?name=${user?.username || "Admin"}&background=random`}

@@ -1,5 +1,5 @@
 
-import { Home, Layout, Settings, Users, FolderKanban } from "lucide-react";
+import { Home, Users, FolderKanban } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const Sidebar = () => {
@@ -7,9 +7,8 @@ const Sidebar = () => {
 
     const menuItems = [
         { icon: Home, label: "Home", path: "/" },
-        { icon: FolderKanban, label: "Tasks", path: "/tasks" }, // Conceptual path
-        { icon: Users, label: "Members", path: "/members" }, // Conceptual path
-        { icon: Settings, label: "Settings", path: "/settings" }, // Conceptual path
+        { icon: FolderKanban, label: "Tasks", path: "/tasks" },
+        { icon: Users, label: "Members", path: "/members" },
     ];
 
     return (
@@ -30,8 +29,8 @@ const Sidebar = () => {
                             key={item.label}
                             to={item.path}
                             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
-                                    ? "bg-indigo-50 text-indigo-600 font-semibold"
-                                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                                ? "bg-indigo-50 text-indigo-600 font-semibold"
+                                : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                                 }`}
                         >
                             <Icon className={`w-5 h-5 ${isActive ? "text-indigo-600" : "text-gray-400 group-hover:text-gray-600"}`} />
@@ -40,18 +39,6 @@ const Sidebar = () => {
                     );
                 })}
             </nav>
-
-            <div className="mt-auto px-4 py-4 bg-indigo-50 rounded-2xl">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                        <span className="text-xs font-bold text-indigo-600">?</span>
-                    </div>
-                    <div>
-                        <p className="text-sm font-semibold text-indigo-900">Help Center</p>
-                        <p className="text-xs text-indigo-600">Go to help center</p>
-                    </div>
-                </div>
-            </div>
         </div>
     );
 };
