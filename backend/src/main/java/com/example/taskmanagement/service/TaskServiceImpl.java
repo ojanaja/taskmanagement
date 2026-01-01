@@ -52,8 +52,13 @@ public class TaskServiceImpl implements TaskService {
             try {
                 task.setPriority(TaskPriority.valueOf(taskRequest.getPriority()));
             } catch (IllegalArgumentException e) {
-                // Ignore
             }
+        }
+
+        if (taskRequest.getAssignedUserId() != null) {
+            User assignedUser = userRepository.findById(taskRequest.getAssignedUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Assigned User not found"));
+            task.setAssignedUser(assignedUser);
         }
 
         task.setUser(user);
@@ -85,6 +90,13 @@ public class TaskServiceImpl implements TaskService {
 
             }
         }
+
+        if (taskRequest.getAssignedUserId() != null) {
+            User assignedUser = userRepository.findById(taskRequest.getAssignedUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Assigned User not found"));
+            task.setAssignedUser(assignedUser);
+        }
+
         task.setDueDate(taskRequest.getDueDate());
         task.setAttachments(taskRequest.getAttachments());
 
@@ -119,6 +131,8 @@ public class TaskServiceImpl implements TaskService {
                 task.getUpdatedAt(),
                 task.getDueDate(),
                 task.getAttachments(),
-                task.getPriority());
+                task.getPriority(),
+                task.getAssignedUser() != null ? task.getAssignedUser().getId() : null,
+                task.getAssignedUser() != null ? task.getAssignedUser().getUsername() : null);
     }
 }

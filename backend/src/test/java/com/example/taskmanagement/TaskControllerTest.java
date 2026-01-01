@@ -47,7 +47,7 @@ public class TaskControllerTest {
                 request.setDescription("Description");
 
                 TaskResponse response = new TaskResponse(1L, "New Task", "Description", null, null, null, null, null,
-                                null);
+                                null, null, null);
 
                 when(taskService.createTask(any(Long.class), any(TaskRequest.class))).thenReturn(response);
 
@@ -65,7 +65,8 @@ public class TaskControllerTest {
 
         @Test
         public void testGetAllTasks() throws Exception {
-                TaskResponse response = new TaskResponse(1L, "Task 1", "Desc", null, null, null, null, null, null);
+                TaskResponse response = new TaskResponse(1L, "Task 1", "Desc", null, null, null, null, null, null, null,
+                                null);
                 when(taskService.getAllTasks(any(Long.class))).thenReturn(Collections.singletonList(response));
 
                 UserDetailsImpl userDetails = new UserDetailsImpl(1L, "testuser", "password",

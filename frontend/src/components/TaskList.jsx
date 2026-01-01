@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dialog";
 import api from "@/lib/api";
 import { CreateTask } from "./CreateTask";
+import UserSelect from "./UserSelect";
 
 const COLUMNS = [
     { id: 'PENDING', title: 'To Do', color: 'bg-blue-50 text-blue-700' },
@@ -175,6 +176,7 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
     const [editDescription, setEditDescription] = useState(task.description);
     const [editDueDate, setEditDueDate] = useState(task.dueDate ? task.dueDate.slice(0, 16) : "");
     const [editPriority, setEditPriority] = useState(task.priority || "MEDIUM");
+    const [editAssignedUserId, setEditAssignedUserId] = useState(task.assignedUserId || "");
     const [uploading, setUploading] = useState(false);
     const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -189,7 +191,8 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
             title: editTitle,
             description: editDescription,
             dueDate: editDueDate ? new Date(editDueDate).toISOString() : null,
-            priority: editPriority
+            priority: editPriority,
+            assignedUserId: editAssignedUserId || null
         });
         setIsEditing(false);
     };
@@ -199,6 +202,7 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
         setEditDescription(task.description);
         setEditDueDate(task.dueDate ? task.dueDate.slice(0, 16) : "");
         setEditPriority(task.priority || "MEDIUM");
+        setEditAssignedUserId(task.assignedUserId || "");
         setIsEditing(false);
     };
 
@@ -300,6 +304,14 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
                     </div>
 
                     <div className="space-y-1">
+                        <span className="text-xs text-muted-foreground font-medium">Assign To</span>
+                        <UserSelect
+                            value={editAssignedUserId}
+                            onChange={setEditAssignedUserId}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
                         <span className="text-xs text-muted-foreground font-medium">Attachments</span>
                         <div className="flex flex-wrap gap-2 mb-2">
                             {task.attachments?.map((url, idx) => (
@@ -331,7 +343,7 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
                 style={style}
                 {...attributes}
                 {...listeners}
-                className={`bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-grab group ${isDragging ? 'z-50 opacity-50' : ''}`}
+                className={`bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-grab group relative ${isDragging ? 'z-50 opacity-50' : ''}`}
                 onDoubleClick={() => setIsEditing(true)}
             >
                 <div className="flex justify-between items-start mb-3">
@@ -375,6 +387,16 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
                         </div>
                     </div>
                 </div>
+
+                {task.assignedUserId && (
+                    <div className="absolute top-5 right-5" title={`Assigned to ${task.assignedUsername}`}>
+                        <img
+                            className="w-6 h-6 rounded-full border border-gray-200"
+                            src={`https://ui-avatars.com/api/?name=${task.assignedUsername}&background=random&color=fff&size=64`}
+                            alt={task.assignedUsername}
+                        />
+                    </div>
+                )}
             </div>
 
             <Dialog open={!!previewUrl} onOpenChange={(open) => !open && setPreviewUrl(null)}>

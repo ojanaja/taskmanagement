@@ -65,4 +65,14 @@ public class TaskRequest {
     public void setPriority(String priority) {
         this.priority = priority;
     }
+
+    private Long assignedUserId;
+
+    public Long getAssignedUserId() {
+        return assignedUserId;
+    }
+
+    public void setAssignedUserId(Long assignedUserId) {
+        this.assignedUserId = assignedUserId;
+    }
 }

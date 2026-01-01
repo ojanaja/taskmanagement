@@ -16,9 +16,12 @@ public class TaskResponse {
     private java.time.LocalDateTime dueDate;
     private java.util.List<String> attachments;
     private TaskPriority priority;
+    private Long assignedUserId;
+    private String assignedUsername;
 
     public TaskResponse(Long id, String title, String description, TaskStatus status, LocalDateTime createdAt,
-            LocalDateTime updatedAt, LocalDateTime dueDate, java.util.List<String> attachments, TaskPriority priority) {
+            LocalDateTime updatedAt, LocalDateTime dueDate, java.util.List<String> attachments, TaskPriority priority,
+            Long assignedUserId, String assignedUsername) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -28,13 +31,13 @@ public class TaskResponse {
         this.dueDate = dueDate;
         this.attachments = attachments;
         this.priority = priority;
+        this.assignedUserId = assignedUserId;
+        this.assignedUsername = assignedUsername;
     }
 
     public Long getId() {
         return id;
     }
-
-    // ... items ...
 
     public TaskPriority getPriority() {
         return priority;
@@ -102,5 +105,21 @@ public class TaskResponse {
 
     public void setAttachments(java.util.List<String> attachments) {
         this.attachments = attachments;
+    }
+
+    public Long getAssignedUserId() {
+        return assignedUserId;
+    }
+
+    public void setAssignedUserId(Long assignedUserId) {
+        this.assignedUserId = assignedUserId;
+    }
+
+    public String getAssignedUsername() {
+        return assignedUsername;
+    }
+
+    public void setAssignedUsername(String assignedUsername) {
+        this.assignedUsername = assignedUsername;
     }
 }

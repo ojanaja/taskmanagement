@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FileIcon } from "lucide-react";
 import api from '@/lib/api';
+import UserSelect from './UserSelect';
 
 export function CreateTask() {
     const [open, setOpen] = useState(false);
@@ -23,6 +24,7 @@ export function CreateTask() {
     const [description, setDescription] = useState('');
     const [dueDate, setDueDate] = useState('');
     const [priority, setPriority] = useState('MEDIUM');
+    const [assignedUserId, setAssignedUserId] = useState('');
     const [attachments, setAttachments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -38,6 +40,7 @@ export function CreateTask() {
                 description,
                 status: 'PENDING',
                 priority,
+                assignedUserId: assignedUserId || null,
                 dueDate: dueDate ? new Date(dueDate).toISOString() : null,
                 attachments: attachments
             })).unwrap();
@@ -47,6 +50,7 @@ export function CreateTask() {
             setDescription('');
             setDueDate('');
             setPriority('MEDIUM');
+            setAssignedUserId('');
             setAttachments([]);
         } catch (error) {
             console.error("Failed to create task", error);
@@ -87,6 +91,7 @@ export function CreateTask() {
             setDescription('');
             setDueDate('');
             setPriority('MEDIUM');
+            setAssignedUserId('');
             setAttachments([]);
         }
     }
@@ -155,6 +160,17 @@ export function CreateTask() {
                                 <option value="MEDIUM">Medium</option>
                                 <option value="HIGH">High</option>
                             </select>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="assignee" className="text-right">
+                                Assign To
+                            </Label>
+                            <div className="col-span-3">
+                                <UserSelect
+                                    value={assignedUserId}
+                                    onChange={setAssignedUserId}
+                                />
+                            </div>
                         </div>
                         <div className="grid grid-cols-4 items-start gap-4">
                             <Label htmlFor="attachments" className="text-right pt-2">

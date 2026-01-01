@@ -46,6 +46,10 @@ public class Task {
     @Column(nullable = false)
     private TaskPriority priority = TaskPriority.MEDIUM;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_user_id")
+    private User assignedUser;
+
     public Task() {
     }
 
@@ -127,5 +131,13 @@ public class Task {
 
     public void setPriority(TaskPriority priority) {
         this.priority = priority;
+    }
+
+    public User getAssignedUser() {
+        return assignedUser;
+    }
+
+    public void setAssignedUser(User assignedUser) {
+        this.assignedUser = assignedUser;
     }
 }
