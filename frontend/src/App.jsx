@@ -17,7 +17,7 @@ import Members from "./pages/Members";
 const Home = () => {
   return (
     <Layout>
-      <div className="mb-8">
+      <div className="mb-8 ml-8">
         <h1 className="text-3xl font-bold text-gray-900">Kanban Board</h1>
         <p className="text-gray-500 mt-1">Monitor project status and team productivity</p>
       </div>

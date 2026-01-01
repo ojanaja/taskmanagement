@@ -7,7 +7,6 @@ const Sidebar = () => {
 
     const menuItems = [
         { icon: Home, label: "Home", path: "/" },
-        { icon: FolderKanban, label: "Tasks", path: "/tasks" },
         { icon: Users, label: "Members", path: "/members" },
     ];
 
@@ -15,9 +14,9 @@ const Sidebar = () => {
         <div className="h-screen w-64 bg-white border-r border-gray-200 flex flex-col p-6 fixed left-0 top-0 z-10">
             <div className="flex items-center gap-2 mb-10 px-2">
                 <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">S</span>
+                    <span className="text-white font-bold text-lg">T</span>
                 </div>
-                <h1 className="text-xl font-bold text-gray-800 tracking-tight">SlothUI</h1>
+                <h1 className="text-xl font-bold text-gray-800 tracking-tight">Task Management</h1>
             </div>
 
             <nav className="flex-1 space-y-2">

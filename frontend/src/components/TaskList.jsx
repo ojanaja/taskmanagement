@@ -137,7 +137,7 @@ export function TaskList() {
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
             >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 align-start items-start">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 align-start items-start ml-4">
                     {COLUMNS.map((col) => (
                         <DroppableColumn
                             key={col.id}

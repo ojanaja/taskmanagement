@@ -26,7 +26,7 @@ const Members = () => {
 
     return (
         <Layout>
-            <div className="mb-8">
+            <div className="mb-8 ml-8">
                 <h1 className="text-3xl font-bold text-gray-900">Team Members</h1>
                 <p className="text-gray-500 mt-1">Manage and view all registered users.</p>
             </div>
@@ -34,7 +34,7 @@ const Members = () => {
             {loading ? (
                 <div className="text-center py-10">Loading members...</div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ml-8">
                     {users.map((user) => (
                         <Card key={user.id} className="hover:shadow-md transition-shadow">
                             <CardHeader className="flex flex-row items-center gap-4 pb-2">
