@@ -51,6 +51,9 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<TaskResponse> updateTask(@AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable Long id, @Valid @RequestBody TaskRequest taskRequest) {
+        System.out.println("Received Update Request for ID: " + id);
+        System.out.println("Payload Title: " + taskRequest.getTitle());
+        System.out.println("Payload Attachments: " + taskRequest.getAttachments());
         TaskResponse updatedTask = taskService.updateTask(userDetails.getId(), id, taskRequest);
         return ResponseEntity.ok(updatedTask);
     }

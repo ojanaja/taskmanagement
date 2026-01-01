@@ -28,7 +28,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Paperclip, FileIcon, MessageSquare, Pencil } from "lucide-react";
+import { Calendar, Paperclip, FileIcon, MessageSquare, Pencil, X } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -127,8 +127,7 @@ export function TaskList() {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h2 className="text-3xl font-bold tracking-tight">Kanban Board</h2>
+            <div className="flex justify-end items-center">
                 <CreateTask />
             </div>
 
@@ -177,8 +176,20 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
     const [editDueDate, setEditDueDate] = useState(task.dueDate ? task.dueDate.slice(0, 16) : "");
     const [editPriority, setEditPriority] = useState(task.priority || "MEDIUM");
     const [editAssignedUserId, setEditAssignedUserId] = useState(task.assignedUserId || "");
+    const [editAttachments, setEditAttachments] = useState(task.attachments || []);
     const [uploading, setUploading] = useState(false);
     const [previewUrl, setPreviewUrl] = useState(null);
+
+    useEffect(() => {
+        if (!isEditing) {
+            setEditTitle(task.title);
+            setEditDescription(task.description);
+            setEditDueDate(task.dueDate ? task.dueDate.slice(0, 16) : "");
+            setEditPriority(task.priority || "MEDIUM");
+            setEditAssignedUserId(task.assignedUserId || "");
+            setEditAttachments(task.attachments || []);
+        }
+    }, [task, isEditing]);
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -187,13 +198,16 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
     };
 
     const handleSave = () => {
-        handleUpdateTask(task.id, {
+        const payload = {
             title: editTitle,
             description: editDescription,
+            status: task.status,
             dueDate: editDueDate ? new Date(editDueDate).toISOString() : null,
             priority: editPriority,
-            assignedUserId: editAssignedUserId || null
-        });
+            assignedUserId: editAssignedUserId || null,
+            attachments: editAttachments
+        };
+        handleUpdateTask(task.id, payload);
         setIsEditing(false);
     };
 
@@ -203,6 +217,7 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
         setEditDueDate(task.dueDate ? task.dueDate.slice(0, 16) : "");
         setEditPriority(task.priority || "MEDIUM");
         setEditAssignedUserId(task.assignedUserId || "");
+        setEditAttachments(task.attachments || []);
         setIsEditing(false);
     };
 
@@ -222,11 +237,7 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
             });
 
             const newAttachment = response.data.fileUrl;
-            const currentAttachments = task.attachments || [];
-
-            handleUpdateTask(task.id, {
-                attachments: [...currentAttachments, newAttachment]
-            });
+            setEditAttachments(prev => [...prev, newAttachment]);
         } catch (error) {
             console.error("File upload failed", error);
             alert("File upload failed");
@@ -239,6 +250,10 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
         e.stopPropagation();
         e.preventDefault();
         setPreviewUrl(url);
+    };
+
+    const handleRemoveAttachment = (indexToRemove) => {
+        setEditAttachments(prev => prev.filter((_, idx) => idx !== indexToRemove));
     };
 
     const priority = task.priority || "MEDIUM";
@@ -314,10 +329,22 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
                     <div className="space-y-1">
                         <span className="text-xs text-muted-foreground font-medium">Attachments</span>
                         <div className="flex flex-wrap gap-2 mb-2">
-                            {task.attachments?.map((url, idx) => (
-                                <button key={idx} onClick={(e) => handleFileClick(e, url)} className="text-xs text-blue-500 hover:underline flex items-center bg-blue-50 px-2 py-1 rounded">
-                                    <FileIcon className="w-3 h-3 mr-1" /> File {idx + 1}
-                                </button>
+                            {editAttachments.map((url, idx) => (
+                                <div key={idx} className="flex items-center bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                                    <button onClick={(e) => handleFileClick(e, url)} className="text-xs text-blue-500 hover:underline flex items-center mr-2">
+                                        <FileIcon className="w-3 h-3 mr-1" /> File {idx + 1}
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            handleRemoveAttachment(idx);
+                                        }}
+                                        className="text-gray-400 hover:text-red-500 transition-colors"
+                                        title="Remove file"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                </div>
                             ))}
                         </div>
                         <Input
@@ -375,6 +402,12 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
                         <div className="flex items-center gap-1 text-xs">
                             <span className="text-[10px]">#{task.id}</span>
                         </div>
+                        {task.dueDate && (
+                            <div className="flex items-center gap-1 text-xs text-red-500">
+                                <Calendar className="w-3.5 h-3.5" />
+                                <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+                            </div>
+                        )}
                         <div className="flex items-center gap-1 text-xs">
                             <Paperclip className="w-3.5 h-3.5" />
                             <span>{task.attachments ? task.attachments.length : 0}</span>
