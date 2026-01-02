@@ -1,0 +1,56 @@
+services:
+  # Backend Service
+  - type: web
+    name: taskmanagement-backend
+    env: docker
+    plan: free
+    region: singapore
+    branch: main
+    
+    # We use a custom Dockerfile path if needed, but standard is root
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SERVER_PORT
+        value: 8080
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: taskmanagement-db
+          property: connectionString
+      - key: JWT_SECRET
+        sync: false # User must provide this in dashboard
+      - key: JWT_EXPIRATION_MS
+        value: 86400000
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: taskmanagement-frontend
+          property: url
+
+  # Frontend Service
+  - type: web
+    name: taskmanagement-frontend
+    env: docker
+    plan: free
+    region: singapore
+    branch: main
+    
+    dockerContext: ./frontend
+    dockerfilePath: ./frontend/Dockerfile
+    
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: taskmanagement-backend
+          property: url
+
+databases:
+  - name: taskmanagement-db
+    plan: free
+    region: singapore
+    databaseName: taskdb
+    user: postgres
