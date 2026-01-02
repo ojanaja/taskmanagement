@@ -7,7 +7,6 @@ services:
     region: singapore
     branch: main
     
-    # We use a custom Dockerfile path if needed, but standard is root
     dockerContext: ./backend
     dockerfilePath: ./backend/Dockerfile
     
@@ -20,15 +19,23 @@ services:
         fromDatabase:
           name: taskmanagement-db
           property: connectionString
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: taskmanagement-db
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: taskmanagement-db
+          property: password
       - key: JWT_SECRET
-        sync: false # User must provide this in dashboard
+        sync: false
       - key: JWT_EXPIRATION_MS
         value: 86400000
-      - key: FRONTEND_URL
+      - key: FRONTEND_HOST
         fromService:
           type: web
           name: taskmanagement-frontend
-          property: url
+          property: host
 
   # Frontend Service
   - type: web
@@ -42,15 +49,15 @@ services:
     dockerfilePath: ./frontend/Dockerfile
     
     envVars:
-      - key: VITE_API_URL
+      - key: VITE_API_HOST
         fromService:
           type: web
           name: taskmanagement-backend
-          property: url
+          property: host
 
 databases:
   - name: taskmanagement-db
     plan: free
     region: singapore
     databaseName: taskdb
-    user: postgres
+    user: taskuser
