@@ -177,6 +177,7 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(task.title);
     const [editDescription, setEditDescription] = useState(task.description);
+    const [editStatus, setEditStatus] = useState(task.status);
     const [editDueDate, setEditDueDate] = useState(task.dueDate ? task.dueDate.slice(0, 16) : "");
     const [editPriority, setEditPriority] = useState(task.priority || "MEDIUM");
     const [editAssignedUserId, setEditAssignedUserId] = useState(task.assignedUserId || "");
@@ -188,6 +189,7 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
         if (!isEditing) {
             setEditTitle(task.title);
             setEditDescription(task.description);
+            setEditStatus(task.status);
             setEditDueDate(task.dueDate ? task.dueDate.slice(0, 16) : "");
             setEditPriority(task.priority || "MEDIUM");
             setEditAssignedUserId(task.assignedUserId || "");
@@ -205,7 +207,7 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
         const payload = {
             title: editTitle,
             description: editDescription,
-            status: task.status,
+            status: editStatus,
             dueDate: editDueDate ? new Date(editDueDate).toISOString() : null,
             priority: editPriority,
             assignedUserId: editAssignedUserId || null,
@@ -218,6 +220,7 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
     const handleCancel = () => {
         setEditTitle(task.title);
         setEditDescription(task.description);
+        setEditStatus(task.status);
         setEditDueDate(task.dueDate ? task.dueDate.slice(0, 16) : "");
         setEditPriority(task.priority || "MEDIUM");
         setEditAssignedUserId(task.assignedUserId || "");
@@ -301,8 +304,22 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
 
                     <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-1">
+                            <span className="text-xs text-muted-foreground font-medium">Status</span>
+                            <select
+                                aria-label="Status"
+                                value={editStatus}
+                                onChange={(e) => setEditStatus(e.target.value)}
+                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {COLUMNS.map(col => (
+                                    <option key={col.id} value={col.id}>{col.title}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="space-y-1">
                             <span className="text-xs text-muted-foreground font-medium">Priority</span>
                             <select
+                                aria-label="Priority"
                                 value={editPriority}
                                 onChange={(e) => setEditPriority(e.target.value)}
                                 className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
@@ -312,7 +329,7 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
                                 <option value="HIGH">High</option>
                             </select>
                         </div>
-                        <div className="space-y-1">
+                        <div className="space-y-1 col-span-2">
                             <span className="text-xs text-muted-foreground font-medium">Deadline</span>
                             <Input
                                 type="datetime-local"

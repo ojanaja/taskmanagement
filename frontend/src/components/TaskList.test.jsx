@@ -89,7 +89,6 @@ describe('TaskList Component', () => {
         api.get.mockResolvedValue({ data: [mockTask] });
         api.delete.mockResolvedValue({});
 
-        // Mock window.confirm
         const confirmSpy = vi.spyOn(window, 'confirm');
         confirmSpy.mockImplementation(() => true);
 
@@ -99,10 +98,8 @@ describe('TaskList Component', () => {
             expect(screen.getByText('Task to Delete')).toBeInTheDocument();
         });
 
-        // Double click to open edit
         fireEvent.doubleClick(screen.getByText('Task to Delete'));
 
-        // Click delete
         fireEvent.click(screen.getByText('Delete'));
 
         await waitFor(() => {
@@ -110,5 +107,29 @@ describe('TaskList Component', () => {
         });
 
         confirmSpy.mockRestore();
+    });
+
+    test('opens edit modal and updates task status', async () => {
+        const mockTask = { id: 1, title: 'Task to Move', description: 'Desc', status: 'PENDING' };
+        api.get.mockResolvedValue({ data: [mockTask] });
+        api.put.mockResolvedValue({ data: { ...mockTask, status: 'IN_PROGRESS' } });
+
+        renderWithRedux(<TaskList />);
+
+        await waitFor(() => {
+            expect(screen.getByText('Task to Move')).toBeInTheDocument();
+        });
+
+        fireEvent.doubleClick(screen.getByText('Task to Move'));
+
+        fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'IN_PROGRESS' } });
+
+        fireEvent.click(screen.getByText('Save'));
+
+        await waitFor(() => {
+            expect(api.put).toHaveBeenCalledWith('/tasks/1', expect.objectContaining({
+                status: 'IN_PROGRESS'
+            }));
+        });
     });
 });
