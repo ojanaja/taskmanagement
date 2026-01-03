@@ -34,10 +34,13 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogFooter,
+    DialogDescription,
 } from "@/components/ui/dialog";
 import api from "@/lib/api";
 import { CreateTask } from "./CreateTask";
 import UserSelect from "./UserSelect";
+import { toast } from "sonner";
 
 const COLUMNS = [
     { id: 'PENDING', title: 'To Do', color: 'bg-blue-50 text-blue-700' },
@@ -120,13 +123,17 @@ export function TaskList() {
     };
 
     const handleDelete = (id) => {
-        if (confirm("Are you sure you want to delete this task?")) {
-            dispatch(deleteTask(id));
-        }
-    }
+        dispatch(deleteTask(id))
+            .unwrap()
+            .then(() => toast.success("Task deleted"))
+            .catch(() => toast.error("Failed to delete task"));
+    };
 
     const handleUpdateTask = (id, updates) => {
-        dispatch(updateTask({ id, updates }));
+        dispatch(updateTask({ id, updates }))
+            .unwrap()
+            .then(() => toast.success("Task updated"))
+            .catch(() => toast.error("Failed to update task"));
     };
 
     return (
@@ -184,6 +191,7 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
     const [editAttachments, setEditAttachments] = useState(task.attachments || []);
     const [uploading, setUploading] = useState(false);
     const [previewUrl, setPreviewUrl] = useState(null);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
     useEffect(() => {
         if (!isEditing) {
@@ -281,119 +289,140 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
 
     if (isEditing) {
         return (
-            <Card
-                ref={setNodeRef}
-                style={style}
-                className={`relative z-50 bg-white shadow-lg`}
-            >
-                <CardHeader className="p-4 pb-2 space-y-2">
-                    <Input
-                        value={editTitle}
-                        onChange={(e) => setEditTitle(e.target.value)}
-                        className="font-medium"
-                        placeholder="Task Title"
-                    />
-                </CardHeader>
-                <CardContent className="p-4 pt-0 space-y-3">
-                    <Textarea
-                        value={editDescription}
-                        onChange={(e) => setEditDescription(e.target.value)}
-                        className="text-sm min-h-[80px]"
-                        placeholder="Description"
-                    />
+            <>
+                <Card
+                    ref={setNodeRef}
+                    style={style}
+                    className={`relative z-50 bg-white shadow-lg`}
+                >
+                    <CardHeader className="p-4 pb-2 space-y-2">
+                        <Input
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                            className="font-medium"
+                            placeholder="Task Title"
+                        />
+                    </CardHeader>
+                    <CardContent className="p-4 pt-0 space-y-3">
+                        <Textarea
+                            value={editDescription}
+                            onChange={(e) => setEditDescription(e.target.value)}
+                            className="text-sm min-h-[80px]"
+                            placeholder="Description"
+                        />
 
-                    <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                            <span className="text-xs text-muted-foreground font-medium">Status</span>
-                            <select
-                                aria-label="Status"
-                                value={editStatus}
-                                onChange={(e) => setEditStatus(e.target.value)}
-                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                {COLUMNS.map(col => (
-                                    <option key={col.id} value={col.id}>{col.title}</option>
-                                ))}
-                            </select>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="space-y-1">
+                                <span className="text-xs text-muted-foreground font-medium">Status</span>
+                                <select
+                                    aria-label="Status"
+                                    value={editStatus}
+                                    onChange={(e) => setEditStatus(e.target.value)}
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    {COLUMNS.map(col => (
+                                        <option key={col.id} value={col.id}>{col.title}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="space-y-1">
+                                <span className="text-xs text-muted-foreground font-medium">Priority</span>
+                                <select
+                                    aria-label="Priority"
+                                    value={editPriority}
+                                    onChange={(e) => setEditPriority(e.target.value)}
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <option value="LOW">Low</option>
+                                    <option value="MEDIUM">Medium</option>
+                                    <option value="HIGH">High</option>
+                                </select>
+                            </div>
+                            <div className="space-y-1 col-span-2">
+                                <span className="text-xs text-muted-foreground font-medium">Deadline</span>
+                                <Input
+                                    type="datetime-local"
+                                    value={editDueDate}
+                                    onChange={(e) => setEditDueDate(e.target.value)}
+                                />
+                            </div>
                         </div>
+
                         <div className="space-y-1">
-                            <span className="text-xs text-muted-foreground font-medium">Priority</span>
-                            <select
-                                aria-label="Priority"
-                                value={editPriority}
-                                onChange={(e) => setEditPriority(e.target.value)}
-                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <option value="LOW">Low</option>
-                                <option value="MEDIUM">Medium</option>
-                                <option value="HIGH">High</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1 col-span-2">
-                            <span className="text-xs text-muted-foreground font-medium">Deadline</span>
-                            <Input
-                                type="datetime-local"
-                                value={editDueDate}
-                                onChange={(e) => setEditDueDate(e.target.value)}
+                            <span className="text-xs text-muted-foreground font-medium">Assign To</span>
+                            <UserSelect
+                                value={editAssignedUserId}
+                                onChange={setEditAssignedUserId}
                             />
                         </div>
-                    </div>
 
-                    <div className="space-y-1">
-                        <span className="text-xs text-muted-foreground font-medium">Assign To</span>
-                        <UserSelect
-                            value={editAssignedUserId}
-                            onChange={setEditAssignedUserId}
-                        />
-                    </div>
-
-                    <div className="space-y-1">
-                        <span className="text-xs text-muted-foreground font-medium">Attachments</span>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                            {editAttachments.map((url, idx) => (
-                                <div key={idx} className="flex items-center bg-blue-50 px-2 py-1 rounded border border-blue-100">
-                                    <button onClick={(e) => handleFileClick(e, url)} className="text-xs text-blue-500 hover:underline flex items-center mr-2">
-                                        <FileIcon className="w-3 h-3 mr-1" /> File {idx + 1}
-                                    </button>
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            handleRemoveAttachment(idx);
-                                        }}
-                                        className="text-gray-400 hover:text-red-500 transition-colors"
-                                        title="Remove file"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </div>
-                            ))}
+                        <div className="space-y-1">
+                            <span className="text-xs text-muted-foreground font-medium">Attachments</span>
+                            <div className="flex flex-wrap gap-2 mb-2">
+                                {editAttachments.map((url, idx) => (
+                                    <div key={idx} className="flex items-center bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                                        <button onClick={(e) => handleFileClick(e, url)} className="text-xs text-blue-500 hover:underline flex items-center mr-2">
+                                            <FileIcon className="w-3 h-3 mr-1" /> File {idx + 1}
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handleRemoveAttachment(idx);
+                                            }}
+                                            className="text-gray-400 hover:text-red-500 transition-colors"
+                                            title="Remove file"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                            <Input
+                                type="file"
+                                onChange={handleFileUpload}
+                                disabled={uploading}
+                            />
+                            {uploading && <span className="text-xs text-muted-foreground">Uploading...</span>}
                         </div>
-                        <Input
-                            type="file"
-                            onChange={handleFileUpload}
-                            disabled={uploading}
-                        />
-                        {uploading && <span className="text-xs text-muted-foreground">Uploading...</span>}
-                    </div>
-                </CardContent>
-                <CardFooter className="p-4 pt-2 flex justify-between gap-2 bg-gray-50/50">
-                    <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => {
-                            if (confirm("Are you sure you want to delete this task?")) {
-                                onDelete(task.id);
-                            }
-                        }}
-                    >
-                        Delete
-                    </Button>
-                    <div className="flex gap-2">
-                        <Button variant="ghost" size="sm" onClick={handleCancel}>Cancel</Button>
-                        <Button size="sm" onClick={handleSave}>Save</Button>
-                    </div>
-                </CardFooter>
-            </Card>
+                    </CardContent>
+                    <CardFooter className="p-4 pt-2 flex justify-between gap-2 bg-gray-50/50">
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => setShowDeleteDialog(true)}
+                        >
+                            Delete
+                        </Button>
+                        <div className="flex gap-2">
+                            <Button variant="ghost" size="sm" onClick={handleCancel}>Cancel</Button>
+                            <Button size="sm" onClick={handleSave}>Save</Button>
+                        </div>
+                    </CardFooter>
+                </Card>
+
+                <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Delete Task</DialogTitle>
+                            <DialogDescription>
+                                Are you sure you want to delete this task? This action cannot be undone.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
+                            <Button
+                                variant="destructive"
+                                onClick={() => {
+                                    onDelete(task.id);
+                                    setShowDeleteDialog(false);
+                                }}
+                            >
+                                Delete
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </>
         );
     }
 

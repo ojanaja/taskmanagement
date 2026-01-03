@@ -26,9 +26,12 @@ const Home = () => {
   );
 };
 
+import { Toaster } from 'sonner';
+
 const App = () => {
   return (
     <Router>
+      <Toaster richColors position="top-right" style={{ zIndex: 99999 }} />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

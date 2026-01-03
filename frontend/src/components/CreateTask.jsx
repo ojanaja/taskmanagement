@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FileIcon } from "lucide-react";
 import api from '@/lib/api';
 import UserSelect from './UserSelect';
+import { toast } from "sonner";
 
 export function CreateTask() {
     const [open, setOpen] = useState(false);
@@ -45,6 +46,8 @@ export function CreateTask() {
                 attachments: attachments
             })).unwrap();
 
+            toast.success("Task created successfully");
+
             setOpen(false);
             setTitle('');
             setDescription('');
@@ -54,6 +57,7 @@ export function CreateTask() {
             setAttachments([]);
         } catch (error) {
             console.error("Failed to create task", error);
+            toast.error("Failed to create task");
         } finally {
             setLoading(false);
         }
