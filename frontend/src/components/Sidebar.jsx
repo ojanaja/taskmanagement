@@ -2,7 +2,7 @@
 import { Home, Users, FolderKanban } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
-const Sidebar = () => {
+const Sidebar = ({ className = "" }) => {
     const location = useLocation();
 
     const menuItems = [
@@ -11,7 +11,7 @@ const Sidebar = () => {
     ];
 
     return (
-        <div className="h-screen w-64 bg-white border-r border-gray-200 flex flex-col p-6 fixed left-0 top-0 z-10">
+        <div className={`h-screen w-64 bg-white border-r border-gray-200 flex flex-col p-6 ${className}`}>
             <div className="flex items-center gap-2 mb-10 px-2">
                 <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
                     <span className="text-white font-bold text-lg">T</span>
