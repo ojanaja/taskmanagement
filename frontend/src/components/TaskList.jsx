@@ -359,9 +359,22 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
                         {uploading && <span className="text-xs text-muted-foreground">Uploading...</span>}
                     </div>
                 </CardContent>
-                <CardFooter className="p-4 pt-2 flex justify-end gap-2 bg-gray-50/50">
-                    <Button variant="ghost" size="sm" onClick={handleCancel}>Cancel</Button>
-                    <Button size="sm" onClick={handleSave}>Save</Button>
+                <CardFooter className="p-4 pt-2 flex justify-between gap-2 bg-gray-50/50">
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                            if (confirm("Are you sure you want to delete this task?")) {
+                                onDelete(task.id);
+                            }
+                        }}
+                    >
+                        Delete
+                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="ghost" size="sm" onClick={handleCancel}>Cancel</Button>
+                        <Button size="sm" onClick={handleSave}>Save</Button>
+                    </div>
                 </CardFooter>
             </Card>
         );

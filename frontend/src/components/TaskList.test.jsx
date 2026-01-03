@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { TaskList } from '../components/TaskList';
 import api from '../lib/api';
 import { vi } from 'vitest';
@@ -82,5 +82,33 @@ describe('TaskList Component', () => {
 
         const zeros = screen.getAllByText('0');
         expect(zeros).toHaveLength(3);
+    });
+
+    test('opens edit modal and deletes task', async () => {
+        const mockTask = { id: 1, title: 'Task to Delete', description: 'Desc', status: 'PENDING' };
+        api.get.mockResolvedValue({ data: [mockTask] });
+        api.delete.mockResolvedValue({});
+
+        // Mock window.confirm
+        const confirmSpy = vi.spyOn(window, 'confirm');
+        confirmSpy.mockImplementation(() => true);
+
+        renderWithRedux(<TaskList />);
+
+        await waitFor(() => {
+            expect(screen.getByText('Task to Delete')).toBeInTheDocument();
+        });
+
+        // Double click to open edit
+        fireEvent.doubleClick(screen.getByText('Task to Delete'));
+
+        // Click delete
+        fireEvent.click(screen.getByText('Delete'));
+
+        await waitFor(() => {
+            expect(api.delete).toHaveBeenCalledWith('/tasks/1');
+        });
+
+        confirmSpy.mockRestore();
     });
 });
