@@ -5,6 +5,8 @@ import com.example.taskmanagement.payload.task.TaskResponse;
 import com.example.taskmanagement.security.UserDetailsImpl;
 import com.example.taskmanagement.service.TaskService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,6 +19,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
+
+    private static final Logger logger = LoggerFactory.getLogger(TaskController.class);
 
     @Autowired
     private TaskService taskService;
@@ -51,9 +55,9 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<TaskResponse> updateTask(@AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable Long id, @Valid @RequestBody TaskRequest taskRequest) {
-        System.out.println("Received Update Request for ID: " + id);
-        System.out.println("Payload Title: " + taskRequest.getTitle());
-        System.out.println("Payload Attachments: " + taskRequest.getAttachments());
+        logger.info("Received Update Request for ID: {}", id);
+        logger.info("Payload Title: {}", taskRequest.getTitle());
+        logger.info("Payload Attachments: {}", taskRequest.getAttachments());
         TaskResponse updatedTask = taskService.updateTask(userDetails.getId(), id, taskRequest);
         return ResponseEntity.ok(updatedTask);
     }
