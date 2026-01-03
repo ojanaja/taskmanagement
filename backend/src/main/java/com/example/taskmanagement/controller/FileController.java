@@ -39,7 +39,6 @@ public class FileController {
                 throw new RuntimeException("Sorry! Filename contains invalid path sequence " + fileName);
             }
 
-            // Generate unique filename
             String fileExtension = "";
             int dotIndex = fileName.lastIndexOf('.');
             if (dotIndex > 0) {

@@ -5,7 +5,7 @@ import { logout } from './store/authSlice';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import PrivateRoute from './components/PrivateRoute';
-import ProtectedRoute from './components/PrivateRoute'; // Assuming PrivateRoute is renamed to ProtectedRoute
+import ProtectedRoute from './components/PrivateRoute';
 import PublicRoute from './components/PublicRoute';
 import { Button } from '@/components/ui/button';
 import { TaskList } from './components/TaskList';
