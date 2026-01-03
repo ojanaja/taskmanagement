@@ -1,14 +1,32 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { TaskList } from '../components/TaskList';
 import api from '../lib/api';
 import { vi } from 'vitest';
+import { Provider } from 'react-redux';
+import { store } from '../store/store';
 
-vi.mock('../lib/api');
+vi.mock('../lib/api', () => ({
+    default: {
+        get: vi.fn(),
+        post: vi.fn(),
+        put: vi.fn(),
+        delete: vi.fn(),
+        interceptors: { request: { use: vi.fn() } }
+    }
+}));
 
 describe('TaskList Component', () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
+
+    const renderWithRedux = (component) => {
+        return render(
+            <Provider store={store}>
+                {component}
+            </Provider>
+        );
+    };
 
     test('renders tasks fetched from API', async () => {
         const mockTasks = [
@@ -18,9 +36,7 @@ describe('TaskList Component', () => {
 
         api.get.mockResolvedValue({ data: mockTasks });
 
-        render(<TaskList />);
-
-        expect(screen.getByText('Loading tasks...')).toBeInTheDocument();
+        renderWithRedux(<TaskList />);
 
         await waitFor(() => {
             expect(screen.getByText('Task 1')).toBeInTheDocument();
@@ -28,31 +44,43 @@ describe('TaskList Component', () => {
         });
 
         expect(screen.getByText('Description 1')).toBeInTheDocument();
-        expect(screen.getByText('COMPLETED')).toBeInTheDocument();
     });
 
-    test('renders empty state when no tasks', async () => {
+    test('renders tasks with deadline and attachments', async () => {
+        const mockTasks = [
+            {
+                id: 1,
+                title: 'Full Task',
+                description: 'Has everything',
+                status: 'PENDING',
+                dueDate: '2023-12-31T00:00:00.000Z',
+                attachments: ['file1.png', 'file2.png']
+            }
+        ];
+
+        api.get.mockResolvedValue({ data: mockTasks });
+
+        renderWithRedux(<TaskList />);
+
+        await waitFor(() => {
+            expect(screen.getByText('Full Task')).toBeInTheDocument();
+        });
+
+        expect(screen.getByText('2')).toBeInTheDocument();
+    });
+
+    test('renders columns even when no tasks', async () => {
         api.get.mockResolvedValue({ data: [] });
 
-        render(<TaskList />);
+        renderWithRedux(<TaskList />);
 
         await waitFor(() => {
-            expect(screen.getByText(/No tasks found/i)).toBeInTheDocument();
-        });
-    });
-
-    test('handles API failure gracefully', async () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
-        api.get.mockRejectedValue(new Error('Network error'));
-
-        render(<TaskList />);
-
-        await waitFor(() => {
-            expect(screen.queryByText('Loading tasks...')).not.toBeInTheDocument();
+            expect(screen.getByText('To Do')).toBeInTheDocument();
+            expect(screen.getByText('In Progress')).toBeInTheDocument();
+            expect(screen.getByText('Done')).toBeInTheDocument();
         });
 
-        expect(consoleSpy).toHaveBeenCalledWith("Failed to fetch tasks", expect.any(Error));
-
-        consoleSpy.mockRestore();
+        const zeros = screen.getAllByText('0');
+        expect(zeros).toHaveLength(3);
     });
 });

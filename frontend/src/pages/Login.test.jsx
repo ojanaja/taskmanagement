@@ -1,60 +1,58 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import Login from './Login';
-import { AuthProvider } from '../context/AuthProvider';
-import { describe, it, expect, vi } from 'vitest';
+import { Provider } from 'react-redux';
+import { store } from '../store/store';
+import { vi } from 'vitest';
+import api from '../lib/api';
 
-const mockLogin = vi.fn();
-
-vi.mock('../context/AuthProvider', async () => {
-    const actual = await vi.importActual('../context/AuthProvider');
-    return {
-        ...actual,
-        useAuth: () => ({
-            login: mockLogin,
-        }),
-        AuthProvider: ({ children }) => <div>{children}</div>
-    };
-});
-
-vi.mock('@/components/ui/input', () => ({
-    Input: (props) => <input data-testid="mock-input" {...props} />
-}));
-
-vi.mock('@/components/ui/button', () => ({
-    Button: (props) => <button data-testid="mock-button" {...props}>{props.children}</button>
+vi.mock('../lib/api', () => ({
+    default: {
+        get: vi.fn(),
+        post: vi.fn(),
+        put: vi.fn(),
+        delete: vi.fn(),
+        interceptors: { request: { use: vi.fn() } }
+    }
 }));
 
 describe('Login Component', () => {
-    it('renders login form correctly', () => {
-        render(
+    const renderWithRedux = (component) => render(
+        <Provider store={store}>
             <BrowserRouter>
-                <Login />
+                {component}
             </BrowserRouter>
-        );
+        </Provider>
+    );
 
+    test('renders login form correctly', () => {
+        renderWithRedux(<Login />);
         expect(screen.getByRole('heading', { name: 'Login' })).toBeInTheDocument();
-        expect(screen.getAllByTestId('mock-input')[0]).toBeInTheDocument(); // Username
-        expect(screen.getAllByTestId('mock-input')[1]).toBeInTheDocument(); // Password
+        expect(screen.getByLabelText('Username')).toBeInTheDocument();
+        expect(screen.getByLabelText('Password')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument();
     });
 
-    it('submits form with username and password', async () => {
-        mockLogin.mockResolvedValue(true);
+    test('submits form with username and password', async () => {
+        api.post.mockResolvedValue({
+            data: {
+                accessToken: 'fake-token',
+                username: 'testuser',
+                roles: ['ROLE_USER']
+            }
+        });
 
-        render(
-            <BrowserRouter>
-                <Login />
-            </BrowserRouter>
-        );
+        renderWithRedux(<Login />);
 
-        const usernameInput = screen.getAllByTestId('mock-input')[0];
-        const passwordInput = screen.getAllByTestId('mock-input')[1];
-        const submitButton = screen.getByTestId('mock-button');
+        fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'testuser' } });
+        fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password123' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Login' }));
 
-        fireEvent.change(usernameInput, { target: { value: 'testuser' } });
-        fireEvent.change(passwordInput, { target: { value: 'password123' } });
-        fireEvent.click(submitButton);
-
-        expect(mockLogin).toHaveBeenCalledWith('testuser', 'password123');
+        await waitFor(() => {
+            expect(api.post).toHaveBeenCalledWith('/auth/login', {
+                username: 'testuser',
+                password: 'password123'
+            });
+        });
     });
 });

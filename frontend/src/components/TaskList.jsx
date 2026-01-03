@@ -50,6 +50,10 @@ export function TaskList() {
     const { items: tasks, status, searchTerm } = useSelector((state) => state.tasks);
     const [activeId, setActiveId] = useState(null);
 
+    useEffect(() => {
+        dispatch(fetchTasks());
+    }, [dispatch]);
+
     const filteredTasks = tasks.filter(task => {
         if (!searchTerm) return true;
         const lowerTerm = searchTerm.toLowerCase();
