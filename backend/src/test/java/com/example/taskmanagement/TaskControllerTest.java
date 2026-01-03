@@ -77,4 +77,52 @@ public class TaskControllerTest {
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$[0].title").value("Task 1"));
         }
+
+        @Test
+        public void testGetTaskById() throws Exception {
+                TaskResponse response = new TaskResponse(1L, "Task 1", "Desc", null, null, null, null, null, null, null,
+                                null);
+                when(taskService.getTaskById(1L, 1L)).thenReturn(response);
+
+                UserDetailsImpl userDetails = new UserDetailsImpl(1L, "testuser", "password",
+                                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+
+                mockMvc.perform(get("/tasks/1")
+                                .with(user(userDetails)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.title").value("Task 1"));
+        }
+
+        @Test
+        public void testUpdateTask() throws Exception {
+                TaskRequest request = new TaskRequest();
+                request.setTitle("Updated Task");
+                request.setDescription("Updated Desc");
+
+                TaskResponse response = new TaskResponse(1L, "Updated Task", "Updated Desc", null, null, null, null,
+                                null, null, null, null);
+
+                when(taskService.updateTask(any(Long.class), any(Long.class), any(TaskRequest.class)))
+                                .thenReturn(response);
+
+                UserDetailsImpl userDetails = new UserDetailsImpl(1L, "testuser", "password",
+                                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+
+                mockMvc.perform(put("/tasks/1")
+                                .with(user(userDetails))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.title").value("Updated Task"));
+        }
+
+        @Test
+        public void testDeleteTask() throws Exception {
+                UserDetailsImpl userDetails = new UserDetailsImpl(1L, "testuser", "password",
+                                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+
+                mockMvc.perform(delete("/tasks/1")
+                                .with(user(userDetails)))
+                                .andExpect(status().isNoContent());
+        }
 }
