@@ -192,6 +192,9 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
     const [uploading, setUploading] = useState(false);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showErrorDialog, setShowErrorDialog] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
     useEffect(() => {
         if (!isEditing) {
@@ -204,12 +207,6 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
             setEditAttachments(task.attachments || []);
         }
     }, [task, isEditing]);
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1,
-    };
 
     const handleSave = () => {
         const payload = {
@@ -236,9 +233,22 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
         setIsEditing(false);
     };
 
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
+
+        if (file.size > MAX_FILE_SIZE) {
+            setErrorMessage("File size exceeds the 10MB limit. Please upload a smaller file.");
+            setShowErrorDialog(true);
+            e.target.value = '';
+            return;
+        }
 
         const formData = new FormData();
         formData.append("file", file);
@@ -255,9 +265,11 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
             setEditAttachments(prev => [...prev, newAttachment]);
         } catch (error) {
             console.error("File upload failed", error);
-            alert("File upload failed");
+            setErrorMessage("Failed to upload file. Please try again.");
+            setShowErrorDialog(true);
         } finally {
             setUploading(false);
+            e.target.value = '';
         }
     };
 
@@ -419,6 +431,19 @@ function TaskCard({ task, onDelete, isOverlay, handleUpdateTask }) {
                             >
                                 Delete
                             </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+                <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle className="text-red-600">Upload Error</DialogTitle>
+                            <DialogDescription>
+                                {errorMessage}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button onClick={() => setShowErrorDialog(false)}>OK</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
